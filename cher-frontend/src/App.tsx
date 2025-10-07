@@ -29,6 +29,7 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
+            <Route path="/leads/new" element={<ProtectedRoute><LeadForm /></ProtectedRoute>} />
             <Route path="/leads/:id" element={<ProtectedRoute><LeadDetail /></ProtectedRoute>} />
             <Route path="/leads/:id/edit" element={<ProtectedRoute><LeadForm /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
