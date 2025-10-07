@@ -1,4 +1,4 @@
-# Real Estate CRM API — `docs.md`
+# Real Estate CRM API — `readme.md`
 
 **Version:** 2.x (async)  
 **Base URL (local):** `http://127.0.0.1:8000`  
