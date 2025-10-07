@@ -43,17 +43,23 @@ const LeadsByStatusFlexible = z.union([
 ]).catch({}); // default to empty object if nothing matches
 
 
+const NumOrNullTo0 = z.preprocess(
+  (v) => (v == null || v === "" ? 0 : v),
+  z.coerce.number().catch(0)
+);
+
+// replace your ActivitySchema with this more tolerant version
 export const ActivitySchema = z.object({
-  id: z.number().int().positive(),
-  lead_id: z.number().int().positive(),
-  user_id: z.number().int().positive(),
-  activity_type: z.enum(["call","email","meeting","note"]),
-  notes: z.string().optional(),
-  created_at: z.string(),
-  title: z.string(),
-  duration: z.number().int().nonnegative().optional(), // in minutes;
-  activity_date: z.string(),
-  user_name: z.string()
+  id: z.coerce.number().catch(0),
+  lead_id: z.coerce.number().optional().nullable().transform(v => (v ?? undefined)),
+  user_id: z.coerce.number().optional().nullable().transform(v => (v ?? undefined)),
+  activity_type: z.enum(["call", "email", "meeting", "note"]).catch("note"), // default to "note" if unknown
+  title: z.string().min(1).catch("No Title"), // default to "No Title" if empty
+  activity_date: z.string().optional().nullable().transform(v => v ?? ""),
+  user_name: z.string().optional().nullable().transform(v => v ?? "Unknown User"),
+  notes: z.string().optional().nullable().transform(v => v ?? ""),
+  created_at: z.string().optional().nullable().transform(v => v ?? ""),
+  duration: NumOrNullTo0.optional(),                 // <- null → 0, strings → number, bad → 0
 });
 export type Activity = z.infer<typeof ActivitySchema>;
 
