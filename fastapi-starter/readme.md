@@ -9,6 +9,7 @@
 
 ## Table of Contents
 
+0. [Setup & Run (Install, venv, start)](#setup--run-install-venv-start)  
 1. [Overview](#overview)  
 2. [Auth & Security](#auth--security)  
    2.1. [Get Token (OAuth2 Password Flow)](#get-token-oauth2-password-flow)  
@@ -37,6 +38,89 @@
 9. [Filtering & Pagination Notes](#filtering--pagination-notes)  
 10. [Curl Quickstart](#curl-quickstart)  
 11. [Implementation Notes (for Maintainers)](#implementation-notes-for-maintainers)
+
+---
+
+## Setup & Run (Install, venv, start)
+
+### Prerequisites
+- **Python** 3.10–3.12 (3.11+ recommended)
+- **pip** and **venv** available
+- (Optional) **Git** if you clone a repo
+
+### 1) Create & activate a virtual environment
+**macOS / Linux**
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+**Windows (PowerShell)**
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+### 2) Create `requirements.txt` (or copy this content)
+```txt
+fastapi>=0.115
+uvicorn[standard]>=0.30
+sqlmodel>=0.0.21
+SQLAlchemy>=2.0
+pydantic-settings>=2.3
+python-jose[cryptography]>=3.3
+passlib[bcrypt,argon2]>=1.7
+argon2-cffi>=23.1.0
+aiosqlite>=0.20.0
+greenlet>=3.0
+# If using Postgres instead of SQLite, also:
+# asyncpg>=0.29.0
+```
+
+### 3) Install dependencies
+```bash
+python -m pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
+```
+
+### 4) Create a `.env` file in your project root
+```env
+# Use an **async** driver (aiosqlite for dev). Do NOT use "sqlite:///..."
+DATABASE_URL=sqlite+aiosqlite:///./app.db
+
+SECRET_KEY=change-me
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=1440
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+```
+
+### 5) Run the FastAPI app (from the **project root**)
+```bash
+uvicorn app.main:app --reload
+```
+Open: `http://127.0.0.1:8000/docs`
+
+### 6) Quick health check
+- `GET /` → `{"status": "ok"}`
+- In Swagger, use **Authorize** to log in via `/api/users/token` (OAuth2 password flow).
+
+### Troubleshooting (common)
+- **ModuleNotFoundError: app.core**  
+  - Run from the **project root** (the folder containing `app/`).  
+  - Ensure empty files exist: `app/__init__.py`, `app/core/__init__.py`, `app/routers/__init__.py`.
+
+- **ValueError: the greenlet library is required**  
+  - `pip install "greenlet>=3.0"` (and ensure you’re in the same venv used by `uvicorn`).
+
+- **AsyncContextNotStarted** / DB errors  
+  - Your `DATABASE_URL` must be async (e.g., `sqlite+aiosqlite:///./app.db`), not `sqlite:///...`.  
+  - Confirm `aiosqlite` (or `asyncpg`) is installed.
+
+- **401 in Swagger after Authorize**  
+  - Ensure `/api/users/token` exists (OAuth2 form), and you used a registered `username`/`password`.
+
+- **405 Method Not Allowed on activities POST**  
+  - Make sure the **activities router** is included in `main.py` and you’re posting to `/api/leads/{lead_id}/activities` (trailing slash allowed).
 
 ---
 
@@ -478,4 +562,4 @@ curl -H "Authorization: Bearer $TOKEN" http://127.0.0.1:8000/api/dashboard
 
 --- 
 
-**End of `docs.md`**
+**End of `readme.md`**
